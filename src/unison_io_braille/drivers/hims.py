@@ -28,7 +28,9 @@ class HimsBrailleDriver(BrailleDeviceDriver):
 
     def send_cells(self, cells: BrailleCells) -> None:
         # Simplified output frame; actual HIMS uses custom protocols.
-        report = bytearray([0x11, len(cells.cells)])
+        report = bytearray([0x30, len(cells.cells)])
+        cursor = 0xFF if cells.cursor_position is None else int(cells.cursor_position)
+        report.append(cursor)
         for cell in cells.cells:
             mask = 0
             for i, v in enumerate(cell.dots):

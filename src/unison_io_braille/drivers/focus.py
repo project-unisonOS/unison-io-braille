@@ -40,14 +40,17 @@ class FocusBrailleDriver(BrailleDeviceDriver):
 
     def send_cells(self, cells: BrailleCells) -> None:
         """
-        Construct a simple HID output report:
-          - Report ID 0x10
-          - Byte 1: cell count
-          - Bytes 2..N: per-cell dot bitmask (bit0=dot1, bit7=dot8)
+        Construct a HID output report modeled after Focus display frames:
+          - Report ID 0x08 (display data)
+          - Byte 1: total cells
+          - Byte 2: cursor position (0-based) or 0xFF for none
+          - Bytes 3..N: per-cell dot bitmask (bit0=dot1, bit7=dot8)
         """
         report = bytearray()
-        report.append(0x10)
+        report.append(0x08)
         report.append(len(cells.cells))
+        cursor = 0xFF if cells.cursor_position is None else int(cells.cursor_position)
+        report.append(cursor)
         for cell in cells.cells:
             mask = 0
             for i, v in enumerate(cell.dots):

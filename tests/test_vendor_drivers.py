@@ -12,7 +12,7 @@ def test_handytech_driver_parses_text_and_routing():
     assert any(e.type == "routing" and "cell-3" in e.keys for e in routing)
     cells = BrailleCells(rows=1, cols=1, cells=[BrailleCell([True, False, False, False, False, False])])
     drv.send_cells(cells)
-    assert drv.last_output and drv.last_output[0] == 0x10
+    assert drv.last_output and drv.last_output[0] == 0x20
 
 
 def test_hims_driver_parses_nav_and_output():
@@ -23,4 +23,4 @@ def test_hims_driver_parses_nav_and_output():
     assert any(e.type == "text" and e.text == "c" for e in events)
     cells = BrailleCells(rows=1, cols=1, cells=[BrailleCell([True, True, False, False, False, False])])
     drv.send_cells(cells)
-    assert drv.last_output and drv.last_output[0] == 0x11
+    assert drv.last_output and drv.last_output[0] == 0x30

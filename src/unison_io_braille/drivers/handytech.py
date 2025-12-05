@@ -29,8 +29,10 @@ class HandyTechDriver(BrailleDeviceDriver):
         self.device = None
 
     def send_cells(self, cells: BrailleCells) -> None:
-        # HandyTech displays accept dot bitmasks per cell; represent with report 0x10 as placeholder.
-        report = bytearray([0x10, len(cells.cells)])
+        # HandyTech displays accept dot bitmasks per cell; represent with report 0x20 as placeholder.
+        report = bytearray([0x20, len(cells.cells)])
+        cursor = 0xFF if cells.cursor_position is None else int(cells.cursor_position)
+        report.append(cursor)
         for cell in cells.cells:
             mask = 0
             for i, v in enumerate(cell.dots):

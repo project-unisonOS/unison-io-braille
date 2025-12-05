@@ -28,7 +28,7 @@ def test_focus_driver_sends_cells_masked():
     cells = BrailleCells(rows=1, cols=2, cells=[BrailleCell([True, False, True, False, False, False, False, False]), BrailleCell([False, False, False, False, False, False, False, False])])
     drv.send_cells(cells)
     assert drv.last_output is not None
-    # Report id 0x10, count 2, first mask bits 0 and 2 -> 0b00000101 = 5
-    assert drv.last_output[0] == 0x10
+    # Report id 0x08, count 2, cursor byte, first mask bits 0 and 2 -> 0b00000101 = 5
+    assert drv.last_output[0] == 0x08
     assert drv.last_output[1] == 2
-    assert drv.last_output[2] == 0x05
+    assert drv.last_output[3] == 0x05
