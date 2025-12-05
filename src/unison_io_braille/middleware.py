@@ -2,18 +2,21 @@ from fastapi import Request, HTTPException
 from starlette.middleware.base import BaseHTTPMiddleware
 from typing import Callable
 
+from .auth import AuthValidator
+
 
 class ScopeMiddleware(BaseHTTPMiddleware):
-    """Stub scope middleware; extend with real JWT/consent validation later."""
+    """Scope enforcement using a pluggable AuthValidator."""
 
-    def __init__(self, app, required_scope: str | None = None):
+    def __init__(self, app, required_scope: str | None = None, auth: AuthValidator | None = None):
         super().__init__(app)
         self.required_scope = required_scope
+        self.auth = auth or AuthValidator()
 
     async def dispatch(self, request: Request, call_next: Callable):
         if self.required_scope:
-            auth_header = request.headers.get("Authorization")
             test_mode = request.headers.get("X-Test-Bypass") == "1"
-            if not auth_header and not test_mode:
+            auth_header = request.headers.get("Authorization")
+            if not test_mode and not self.auth.authorize(auth_header, self.required_scope):
                 raise HTTPException(status_code=403, detail="missing required scope")
         return await call_next(request)

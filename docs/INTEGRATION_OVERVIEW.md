@@ -25,3 +25,5 @@
 - Renderer focus subscription endpoint not defined; propose adding a lightweight focus text feed (poll/WS) the Braille adapter can consume.
 - Policy/consent scopes for Braille to be added parallel to BCI scopes.
 - Event schema helpers (`src/unison_io_braille/events.py`) now shape `braille.input` and `caps.report`; orchestrator endpoints still to be wired.
+- Focus/feed contract: `/braille/focus` accepts focus text and broadcasts to `/braille/output` WS; renderer should POST focus strings when selection changes.
+- Policy scopes (proposed): `braille.device.pair`, `braille.input.read`, `braille.output.write`, `braille.profile.manage`.

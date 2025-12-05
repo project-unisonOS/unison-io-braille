@@ -29,3 +29,4 @@ class GenericHIDDriver(BrailleDeviceDriver):
             text = ""
         if text:
             yield BrailleEvent(type="text", keys=(), text=text, device_id=self.device.id if self.device else None)
+        # TODO: parse routing/nav keys from HID reports when specs are available.

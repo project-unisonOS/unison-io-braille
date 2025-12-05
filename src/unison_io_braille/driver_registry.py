@@ -3,6 +3,7 @@ from typing import Dict, Optional, Type
 from .interfaces import BrailleDeviceDriver
 from .simulated_driver import SimulatedBrailleDriver
 from .generic_hid import GenericHIDDriver
+from .drivers.focus import FocusBrailleDriver
 
 
 class BrailleDeviceDriverRegistry:
@@ -12,6 +13,7 @@ class BrailleDeviceDriverRegistry:
         self._drivers: Dict[str, Type[BrailleDeviceDriver]] = {}
         self.register("sim", SimulatedBrailleDriver)
         self.register("generic-hid", GenericHIDDriver)
+        self.register("focus-generic", FocusBrailleDriver)
 
     def register(self, key: str, driver: Type[BrailleDeviceDriver]) -> None:
         self._drivers[key] = driver
