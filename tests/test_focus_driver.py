@@ -1,5 +1,5 @@
 from unison_io_braille.drivers.focus import FocusBrailleDriver
-from unison_io_braille.interfaces import DeviceInfo
+from unison_io_braille.interfaces import DeviceInfo, BrailleCells, BrailleCell
 
 
 def test_focus_driver_parses_nav_and_text():
@@ -20,3 +20,15 @@ def test_focus_driver_parses_chord_and_routing():
     # Report ID 0x02, routing for cell 5
     routing = list(drv.on_packet(bytes([0x02, 5])))
     assert any(e.type == "routing" and "cell-5" in e.keys for e in routing)
+
+
+def test_focus_driver_sends_cells_masked():
+    drv = FocusBrailleDriver()
+    drv.open(DeviceInfo(id="focus1", transport="usb"))
+    cells = BrailleCells(rows=1, cols=2, cells=[BrailleCell([True, False, True, False, False, False, False, False]), BrailleCell([False, False, False, False, False, False, False, False])])
+    drv.send_cells(cells)
+    assert drv.last_output is not None
+    # Report id 0x10, count 2, first mask bits 0 and 2 -> 0b00000101 = 5
+    assert drv.last_output[0] == 0x10
+    assert drv.last_output[1] == 2
+    assert drv.last_output[2] == 0x05

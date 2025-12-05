@@ -1,6 +1,6 @@
 from typing import Iterable, List
 
-from ..interfaces import BrailleDeviceDriver, DeviceInfo, BrailleEvent, BrailleCells
+from ..interfaces import BrailleDeviceDriver, DeviceInfo, BrailleEvent, BrailleCells, BrailleCell
 
 
 class FocusBrailleDriver(BrailleDeviceDriver):
@@ -30,6 +30,7 @@ class FocusBrailleDriver(BrailleDeviceDriver):
 
     def __init__(self) -> None:
         self.device: DeviceInfo | None = None
+        self.last_output: bytes | None = None
 
     def open(self, device: DeviceInfo) -> None:
         self.device = device
@@ -38,8 +39,22 @@ class FocusBrailleDriver(BrailleDeviceDriver):
         self.device = None
 
     def send_cells(self, cells: BrailleCells) -> None:
-        # TODO: implement HID output reports to update display cells
-        return
+        """
+        Construct a simple HID output report:
+          - Report ID 0x10
+          - Byte 1: cell count
+          - Bytes 2..N: per-cell dot bitmask (bit0=dot1, bit7=dot8)
+        """
+        report = bytearray()
+        report.append(0x10)
+        report.append(len(cells.cells))
+        for cell in cells.cells:
+            mask = 0
+            for i, v in enumerate(cell.dots):
+                if v:
+                    mask |= 1 << i
+            report.append(mask)
+        self.last_output = bytes(report)
 
     def _make_event(self, etype: str, keys: List[str], text: str | None = None) -> BrailleEvent:
         return BrailleEvent(type=etype, keys=keys, text=text, device_id=self.device.id if self.device else None)

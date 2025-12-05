@@ -1,16 +1,26 @@
 import logging
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 import httpx
+
+from .settings import ORCH_AUTH_TOKEN
 
 logger = logging.getLogger("unison-io-braille.transport")
 
 
-def post_event(host: str, port: str, path: str, payload: Dict[str, Any]) -> tuple[bool, int, dict | None]:
+def _headers(token: Optional[str]) -> Dict[str, str]:
+    if not token:
+        return {}
+    return {"Authorization": f"Bearer {token}"}
+
+
+def post_event(host: str, port: str, path: str, payload: Dict[str, Any], token: Optional[str] = None) -> tuple[bool, int, dict | None]:
+    """Send an event to orchestrator, including Authorization if provided."""
+    auth_token = token or ORCH_AUTH_TOKEN
     try:
         url = f"http://{host}:{port}{path}"
         with httpx.Client(timeout=2.0) as client:
-            resp = client.post(url, json=payload)
+            resp = client.post(url, json=payload, headers=_headers(auth_token))
         parsed = None
         try:
             parsed = resp.json()
