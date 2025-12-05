@@ -30,6 +30,7 @@ _focus_table: str = "ueb_grade1"
 _driver_registry = BrailleDeviceDriverRegistry()
 _driver_registry.register("sim", SimulatedBrailleDriver)
 _manager = BrailleDeviceManager(_driver_registry)
+_active_devices: Dict[str, DeviceInfo] = {}
 
 
 def _bump(key: str) -> None:
@@ -155,8 +156,42 @@ async def discover_devices() -> Dict[str, Any]:
     # Emit caps.report for first device, best effort
     if usb:
         envelope = CapsReport(person_id=DEFAULT_PERSON_ID, device=usb[0]).to_envelope()
-        http_post_json(ORCH_HOST, ORCH_PORT, "/event", envelope)
+        post_event(ORCH_HOST, ORCH_PORT, "/event", envelope)
     return {"devices": devices}
+
+
+@app.post("/braille/devices/attach")
+def attach_device(device: Dict[str, Any]) -> Dict[str, Any]:
+    """Manually attach a device record (for testing or static config)."""
+    info = DeviceInfo(
+        id=device.get("id") or f"manual:{len(_active_devices)+1}",
+        transport=device.get("transport", "sim"),
+        vid=device.get("vid"),
+        pid=device.get("pid"),
+        name=device.get("name"),
+        capabilities=device.get("capabilities") or {},
+    )
+    _manager.attach(info)
+    _active_devices[info.id] = info
+    _bump("/braille/devices/attach")
+    return {"ok": True, "device": info.__dict__}
+
+
+@app.get("/braille/devices")
+def list_devices() -> Dict[str, Any]:
+    return {"devices": [d.__dict__ for d in _active_devices.values()]}
+
+
+@app.post("/braille/input")
+def ingest_input(device_id: str = Body(..., embed=True), data: str = Body(..., embed=True)) -> Dict[str, Any]:
+    """Inject raw input bytes for a device (sim/dev); forwards resulting BrailleEvents to orchestrator."""
+    drv = _manager.active.get(device_id)
+    if not drv:
+        return {"ok": False, "error": "device not attached"}
+    events = drv.on_packet(data.encode())
+    forward_events(events)
+    _bump("/braille/input")
+    return {"ok": True}
 
 
 if __name__ == "__main__":
