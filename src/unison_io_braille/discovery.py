@@ -18,10 +18,12 @@ except Exception:  # pragma: no cover
 
 # Known VID/PID → driver key (placeholder; to be filled with real devices)
 KNOWN_USB_DEVICES: List[Tuple[str, str | None, str]] = [
-    # Freedom Scientific (e.g., Focus Blue line)
-    ("0x05f3", "0x0007", "focus-generic"),
+    # Freedom Scientific (Focus Blue line; sourced from public BRLTTY tables)
+    ("0x05f3", "0x0007", "focus-generic"),  # Focus 14 Blue
+    ("0x05f3", "0x0008", "focus-generic"),  # Focus 40 Blue
+    ("0x05f3", "0x0009", "focus-generic"),  # Focus 80 Blue
     ("0x05f3", None, "focus-generic"),
-    # Handy Tech Elektronik
+    # Handy Tech Elektronik (generic fallback)
     ("0x1fe4", None, "handytech"),
     # HIMS (various models)
     ("0x2001", None, "hims"),

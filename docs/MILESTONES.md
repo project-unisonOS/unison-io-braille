@@ -2,8 +2,8 @@
 
 ## Milestone 1 – Repo setup & architecture (this pass)
 - [x] Scaffold repo (`README`, docs, interfaces).
-- [ ] Decide runtime stack (Python FastAPI aligning with other `unison-io-*` services).
-- [ ] Add CI (lint+pytest skeleton) and constraints/requirements.
+- [x] Decide runtime stack (Python FastAPI aligning with other `unison-io-*` services).
+- [x] Add CI (lint+pytest skeleton) and constraints/requirements.
 
 ## Milestone 2 – Translation layer & simulation
 - Implement `BrailleTranslator` with core tables: UEB Grade 1/2, 6/8-dot (config-driven).
