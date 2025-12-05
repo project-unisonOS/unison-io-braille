@@ -1,11 +1,37 @@
 name: ueb_grade2
 dots: 6
 mapping:
-  # This is a minimal Grade 2 sample (not exhaustive), for early testing
+  # Letters (Grade 1 baseline)
   "a": [1]
-  "and": [1,2,3,4,6]        # & contraction
-  "for": [1,2,3,4,6,7]      # placeholder; real table will differ
-  "of": [1,2,3,5,6]         # placeholder; real table will differ
-  "the": [2,3,4,6]          # placeholder; real table will differ
-  "with": [2,3,4,5,6]       # placeholder; real table will differ
+  "b": [1,2]
+  "c": [1,4]
+  "d": [1,4,5]
+  "e": [1,5]
+  "f": [1,2,4]
+  "g": [1,2,4,5]
+  "h": [1,2,5]
+  "i": [2,4]
+  "j": [2,4,5]
+  "k": [1,3]
+  "l": [1,2,3]
+  "m": [1,3,4]
+  "n": [1,3,4,5]
+  "o": [1,3,5]
+  "p": [1,2,3,4]
+  "q": [1,2,3,4,5]
+  "r": [1,2,3,5]
+  "s": [2,3,4]
+  "t": [2,3,4,5]
+  "u": [1,3,6]
+  "v": [1,2,3,6]
+  "w": [2,4,5,6]
+  "x": [1,3,4,6]
+  "y": [1,3,4,5,6]
+  "z": [1,3,5,6]
   " ": []
+  # Common contractions (sample)
+  "and": [1,2,3,4,6]
+  "for": [1,2,3,4,6,7]   # placeholder: real table may differ
+  "of": [1,2,3,5,6]      # placeholder: real table may differ
+  "the": [2,3,4,6]       # placeholder: real table may differ
+  "with": [2,3,4,5,6]    # placeholder: real table may differ
