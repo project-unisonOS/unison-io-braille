@@ -9,21 +9,27 @@ from fastapi import FastAPI, Body, WebSocket, WebSocketDisconnect
 import uvicorn
 
 from .translator_loader import TableTranslator
-from .events import CapsReport
+from .events import CapsReport, braille_input_event
 from .discovery import enumerate_usb, enumerate_bluetooth
+from .simulated_driver import SimulatedBrailleDriver
+from .interfaces import BrailleEvent, BrailleCells, DeviceInfo
+from .manager import BrailleDeviceDriverRegistry, BrailleDeviceManager
+from .middleware import ScopeMiddleware
+from .input_router import forward_events
+from .transport import post_event
+from .settings import APP_NAME, ORCH_HOST, ORCH_PORT, DEFAULT_PERSON_ID, REQUIRED_SCOPE_INPUT
 
 logger = logging.getLogger("unison-io-braille.server")
 
-APP_NAME = "unison-io-braille"
-ORCH_HOST = os.getenv("UNISON_ORCH_HOST", "orchestrator")
-ORCH_PORT = os.getenv("UNISON_ORCH_PORT", "8080")
-DEFAULT_PERSON_ID = os.getenv("UNISON_DEFAULT_PERSON_ID", "local-user")
-
 app = FastAPI(title=APP_NAME)
+app.add_middleware(ScopeMiddleware, required_scope=REQUIRED_SCOPE_INPUT)
 _metrics: Dict[str, int] = {}
 _ws_clients: List[WebSocket] = []
 _focus_text: Optional[str] = None
 _focus_table: str = "ueb_grade1"
+_driver_registry = BrailleDeviceDriverRegistry()
+_driver_registry.register("sim", SimulatedBrailleDriver)
+_manager = BrailleDeviceManager(_driver_registry)
 
 
 def _bump(key: str) -> None:
@@ -121,7 +127,10 @@ async def websocket_output(ws: WebSocket):
             await _broadcast_focus(_cells_payload(_focus_text, _focus_table))
         while True:
             try:
-                await ws.receive_text()
+                data = await ws.receive_bytes()
+                # Treat incoming bytes as Braille device packets for simulation; forward to orchestrator.
+                evt = BrailleEvent(type="text", keys=(), text=data.decode(errors="ignore"))
+                forward_events([evt])
             except WebSocketDisconnect:
                 break
     finally:

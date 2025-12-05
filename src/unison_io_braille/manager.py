@@ -1,19 +1,7 @@
 from typing import Dict, Optional, Type
 
 from .interfaces import DeviceInfo, BrailleDeviceDriver
-
-
-class BrailleDeviceDriverRegistry:
-    """Registry for mapping device identifiers to drivers."""
-
-    def __init__(self) -> None:
-        self._drivers: Dict[str, Type[BrailleDeviceDriver]] = {}
-
-    def register(self, key: str, driver: Type[BrailleDeviceDriver]) -> None:
-        self._drivers[key] = driver
-
-    def get(self, key: str) -> Optional[Type[BrailleDeviceDriver]]:
-        return self._drivers.get(key)
+from .driver_registry import BrailleDeviceDriverRegistry
 
 
 class BrailleDeviceManager:
@@ -27,8 +15,9 @@ class BrailleDeviceManager:
         self.active: Dict[str, BrailleDeviceDriver] = {}
 
     def attach(self, device: DeviceInfo) -> None:
-        key = f"{device.vid}:{device.pid}" if device.vid and device.pid else device.id
-        driver_cls = self.registry.get(key)
+        key = device.capabilities.get("driver_key") if device.capabilities else None
+        key = key or (f"{device.vid}:{device.pid}" if device.vid and device.pid else device.id)
+        driver_cls = self.registry.get(key) or self.registry.get("generic-hid")
         if not driver_cls:
             return
         driver = driver_cls()
