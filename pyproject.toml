@@ -1,0 +1,22 @@
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "unison-io-braille"
+version = "0.0.1"
+description = "Braille input/output service for UnisonOS"
+readme = "README.md"
+requires-python = ">=3.10"
+authors = [{name = "UnisonOS"}]
+dependencies = [
+  "pyyaml>=6.0",
+]
+
+[project.optional-dependencies]
+dev = ["pytest"]
+io = ["hidapi>=0.14.0", "bleak>=0.22.0"]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+include = ["unison_io_braille*"]

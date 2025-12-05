@@ -1,0 +1,11 @@
+name: ueb_grade2
+dots: 6
+mapping:
+  # This is a minimal Grade 2 sample (not exhaustive), for early testing
+  "a": [1]
+  "and": [1,2,3,4,6]        # & contraction
+  "for": [1,2,3,4,6,7]      # placeholder; real table will differ
+  "of": [1,2,3,5,6]         # placeholder; real table will differ
+  "the": [2,3,4,6]          # placeholder; real table will differ
+  "with": [2,3,4,5,6]       # placeholder; real table will differ
+  " ": []

@@ -10,7 +10,7 @@ Planning scaffold. No device support yet — see `docs/MILESTONES.md` for the ex
 - `docs/BRAILLE_ARCHITECTURE.md` — proposed architecture (drivers, translator, adapter, onboarding helper).
 - `docs/BRAILLE_ONBOARDING.md` — first-boot/onboarding flow considerations.
 - `docs/MILESTONES.md` — phased issues/epics to implement.
-- `src/` — placeholders for core interfaces (device manager, driver, translator, adapter).
+- `src/` — core interfaces, translator, discovery stubs, simulated driver.
 
 ## Dev setup (placeholder)
 ```bash
