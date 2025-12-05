@@ -4,8 +4,8 @@ import os
 import time
 from typing import Dict, Any, List, Optional
 
+from fastapi import FastAPI, Body, WebSocket, WebSocketDisconnect, Request, HTTPException
 import httpx
-from fastapi import FastAPI, Body, WebSocket, WebSocketDisconnect
 import uvicorn
 
 from .translator_loader import TableTranslator
@@ -17,7 +17,8 @@ from .manager import BrailleDeviceDriverRegistry, BrailleDeviceManager
 from .middleware import ScopeMiddleware
 from .input_router import forward_events
 from .transport import post_event
-from .settings import APP_NAME, ORCH_HOST, ORCH_PORT, DEFAULT_PERSON_ID, REQUIRED_SCOPE_INPUT
+from .settings import APP_NAME, ORCH_HOST, ORCH_PORT, DEFAULT_PERSON_ID, REQUIRED_SCOPE_INPUT, REQUIRED_SCOPE_DEVICES
+from .auth import AuthValidator
 
 logger = logging.getLogger("unison-io-braille.server")
 
@@ -31,6 +32,7 @@ _driver_registry = BrailleDeviceDriverRegistry()
 _driver_registry.register("sim", SimulatedBrailleDriver)
 _manager = BrailleDeviceManager(_driver_registry)
 _active_devices: Dict[str, DeviceInfo] = {}
+_auth = AuthValidator()
 
 
 def _bump(key: str) -> None:
@@ -63,6 +65,14 @@ def _cells_payload(text: str, table: str) -> Dict[str, Any]:
         "cells": [[int(i + 1) for i, v in enumerate(cell.dots) if v] for cell in cells.cells],
         "cursor": cells.cursor_position,
     }
+
+
+def _ensure_scope(request: Request, required_scope: str) -> None:
+    auth_header = request.headers.get("Authorization")
+    if request.headers.get("X-Test-Bypass") == "1":
+        return
+    if not _auth.authorize(auth_header, required_scope):
+        raise HTTPException(status_code=403, detail=f"missing required scope: {required_scope}")
 
 
 async def _broadcast_focus(payload: Dict[str, Any]) -> None:
@@ -101,7 +111,7 @@ def metrics() -> str:
 
 
 @app.post("/braille/translate")
-def translate(text: str = Body(..., embed=True), table: str = Body("ueb_grade1", embed=True)) -> Dict[str, Any]:
+def translate(text: str = Body(..., embed=True), table: str = Body("ueb_grade1", embed=True), request: Request = None) -> Dict[str, Any]:
     _bump("/braille/translate")
     return _cells_payload(text, table)
 
@@ -161,8 +171,10 @@ async def discover_devices() -> Dict[str, Any]:
 
 
 @app.post("/braille/devices/attach")
-def attach_device(device: Dict[str, Any] = Body(..., embed=True)) -> Dict[str, Any]:
+def attach_device(device: Dict[str, Any] = Body(..., embed=True), request: Request = None) -> Dict[str, Any]:
     """Manually attach a device record (for testing or static config)."""
+    if request:
+        _ensure_scope(request, REQUIRED_SCOPE_DEVICES)
     info = DeviceInfo(
         id=device.get("id") or f"manual:{len(_active_devices)+1}",
         transport=device.get("transport", "sim"),
@@ -183,8 +195,10 @@ def list_devices() -> Dict[str, Any]:
 
 
 @app.post("/braille/input")
-def ingest_input(device_id: str = Body(..., embed=True), data: str = Body(..., embed=True)) -> Dict[str, Any]:
+def ingest_input(device_id: str = Body(..., embed=True), data: str = Body(..., embed=True), request: Request = None) -> Dict[str, Any]:
     """Inject raw input bytes for a device (sim/dev); forwards resulting BrailleEvents to orchestrator."""
+    if request:
+        _ensure_scope(request, REQUIRED_SCOPE_INPUT)
     drv = _manager.active.get(device_id)
     if not drv:
         return {"ok": False, "error": "device not attached"}

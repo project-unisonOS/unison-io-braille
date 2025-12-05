@@ -17,8 +17,9 @@ except Exception:  # pragma: no cover
 
 
 # Known VID/PID → driver key (placeholder; to be filled with real devices)
-KNOWN_USB_DEVICES: List[Tuple[str, str, str]] = [
-    # Freedom Scientific (e.g., Focus displays)
+KNOWN_USB_DEVICES: List[Tuple[str, str | None, str]] = [
+    # Freedom Scientific (e.g., Focus Blue line)
+    ("0x05f3", "0x0007", "focus-generic"),
     ("0x05f3", None, "focus-generic"),
     # Handy Tech Elektronik
     ("0x1fe4", None, "handytech"),
@@ -37,7 +38,7 @@ def enumerate_usb() -> Iterable[DeviceInfo]:
             vid = f"0x{d['vendor_id']:04x}"
             pid = f"0x{d['product_id']:04x}"
             name = d.get("product_string") or "unknown"
-            key = next((k for v, p, k in KNOWN_USB_DEVICES if v == vid and p == pid), None)
+            key = next((k for v, p, k in KNOWN_USB_DEVICES if v == vid and (p is None or p == pid)), None)
             devices.append(DeviceInfo(id=f"usb:{vid}:{pid}", transport="usb", vid=vid, pid=pid, name=name, capabilities={"driver_key": key}))
     except Exception as exc:  # pragma: no cover
         logger.warning("usb_scan_failed %s", exc)
