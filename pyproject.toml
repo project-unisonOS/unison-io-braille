@@ -16,6 +16,7 @@ dependencies = [
 [project.optional-dependencies]
 dev = ["pytest"]
 io = ["hidapi>=0.14.0", "bleak>=0.22.0"]
+liblouis = ["liblouis>=3.29.0"]
 
 [tool.setuptools.packages.find]
 where = ["src"]
