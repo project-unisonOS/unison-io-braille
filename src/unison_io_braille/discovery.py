@@ -27,6 +27,8 @@ KNOWN_USB_DEVICES: List[Tuple[str, str | None, str]] = [
     ("0x1fe4", None, "handytech"),
     # HIMS (various models)
     ("0x2001", None, "hims"),
+    # HumanWare / Brailliant (treated as HandyTech-compatible for now)
+    ("0x1c71", None, "handytech"),
 ]
 
 # Capability hints (cells, rows, columns) for known PIDs
@@ -34,6 +36,8 @@ CAPABILITY_HINTS: Dict[str, Dict[str, int]] = {
     "0x0007": {"cells": 14, "rows": 1, "cols": 14},
     "0x0008": {"cells": 40, "rows": 1, "cols": 40},
     "0x0009": {"cells": 80, "rows": 1, "cols": 80},
+    "0x1004": {"cells": 32, "rows": 1, "cols": 32},  # HandyTech 32 (example)
+    "0x2001": {"cells": 20, "rows": 1, "cols": 20},  # HIMS small display
 }
 
 
@@ -65,7 +69,15 @@ async def enumerate_bluetooth() -> Iterable[DeviceInfo]:
     try:
         found = await BleakScanner.discover(timeout=4.0)
         for d in found:
-            devices.append(DeviceInfo(id=f"bt:{d.address}", transport="bt", name=d.name, capabilities={"driver_key": None}))
+            key = None
+            name = (d.name or "").lower()
+            if "focus" in name:
+                key = "focus-generic"
+            elif "hims" in name:
+                key = "hims"
+            elif "brailliant" in name or "handy" in name:
+                key = "handytech"
+            devices.append(DeviceInfo(id=f"bt:{d.address}", transport="bt", name=d.name, capabilities={"driver_key": key}))
     except Exception as exc:  # pragma: no cover
         logger.warning("bt_scan_failed %s", exc)
     return devices

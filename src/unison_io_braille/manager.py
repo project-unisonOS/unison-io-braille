@@ -2,6 +2,7 @@ from typing import Dict, Optional, Type
 
 from .interfaces import DeviceInfo, BrailleDeviceDriver
 from .driver_registry import BrailleDeviceDriverRegistry
+from .hid_io import open_hid_writer
 
 
 class BrailleDeviceManager:
@@ -21,7 +22,12 @@ class BrailleDeviceManager:
         if not driver_cls:
             return
         driver = driver_cls()
+        writer = None
+        if device.transport == "usb":
+            writer = open_hid_writer(device.vid, device.pid)
         driver.open(device)
+        if writer and hasattr(driver, "set_output_writer"):
+            driver.set_output_writer(writer)
         self.active[device.id] = driver
 
     def detach(self, device_id: str) -> None:

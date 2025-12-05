@@ -21,12 +21,17 @@ class HandyTechDriver(BrailleDeviceDriver):
     def __init__(self) -> None:
         self.device: DeviceInfo | None = None
         self.last_output: bytes | None = None
+        self.writer = None
 
     def open(self, device: DeviceInfo) -> None:
         self.device = device
 
     def close(self) -> None:
         self.device = None
+        self.writer = None
+
+    def set_output_writer(self, writer) -> None:
+        self.writer = writer
 
     def send_cells(self, cells: BrailleCells) -> None:
         # HandyTech displays accept dot bitmasks per cell; represent with report 0x20 as placeholder.
@@ -40,6 +45,8 @@ class HandyTechDriver(BrailleDeviceDriver):
                     mask |= 1 << i
             report.append(mask)
         self.last_output = bytes(report)
+        if self.writer:
+            self.writer.write(self.last_output)
 
     def _make_event(self, etype: str, keys: List[str], text: str | None = None) -> BrailleEvent:
         return BrailleEvent(type=etype, keys=keys, text=text, device_id=self.device.id if self.device else None)

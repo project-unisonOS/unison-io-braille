@@ -32,3 +32,18 @@ def test_focus_driver_sends_cells_masked():
     assert drv.last_output[0] == 0x08
     assert drv.last_output[1] == 2
     assert drv.last_output[3] == 0x05
+
+
+def test_focus_driver_writes_to_transport():
+    class StubWriter:
+        def __init__(self):
+            self.written = []
+
+        def write(self, data: bytes):
+            self.written.append(bytes(data))
+
+    drv = FocusBrailleDriver()
+    drv.set_output_writer(StubWriter())
+    drv.open(DeviceInfo(id="focus1", transport="usb"))
+    drv.send_cells(BrailleCells(rows=1, cols=1, cells=[BrailleCell([True, False, False, False, False, False, False, False])]))
+    assert drv.writer.written  # type: ignore[attr-defined]
