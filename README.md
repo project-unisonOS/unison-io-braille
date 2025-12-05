@@ -28,5 +28,15 @@ pytest
 - USB devices use hidapi for writes; drivers call async writes to avoid blocking the event loop.
 - Focus/HandyTech/HIMS drivers emit vendor-shaped output reports (report IDs 0x08/0x20/0x30 with cursor + dot masks).
 
+## Remaining Braille tasks (next phases)
+- Harden Braille output path to real devices: unblock platform udev/USB permissions and verify writes on hardware.
+- Implement Braille output subscription to renderer/onboarding focus feed (WS/poll) with panning/routing behavior.
+- Finalize Braille event schema (`braille.input`, `braille.output`) and align with orchestrator envelopes.
+- Expand translation tables (UEB Grade 2 completeness, computer Braille, more languages) and add table selection per user/profile.
+- Add more vendor drivers (HumanWare/Brailliant, additional Focus/HIMS models) and richer HID parsing/output per spec.
+- Add settings/context storage for per-person defaults (table, 6/8-dot, cursor prefs, HID mappings).
+- Integrate Braille-only onboarding flow and shell navigation mapping; add end-to-end tests.
+- Production auth: replace stub/introspection with orchestrator JWKS/consent integration and tighten scope policies.
+
 ## Contributing
 Open issues/PRs against the milestones in `docs/MILESTONES.md`. Add new device drivers by implementing the `BrailleDeviceDriver` interface and registering it with the driver registry. Translation tables should be added as configs or plugins in `src/translator/tables/`.
