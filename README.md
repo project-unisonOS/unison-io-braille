@@ -11,6 +11,7 @@ Planning scaffold. No device support yet — see `docs/MILESTONES.md` for the ex
 - `docs/BRAILLE_ONBOARDING.md` — first-boot/onboarding flow considerations.
 - `docs/MILESTONES.md` — phased issues/epics to implement.
 - `src/` — core interfaces, translator, discovery stubs, simulated driver.
+- `src/unison_io_braille/server.py` — FastAPI skeleton with `/health`, `/ready`, `/metrics`, `/braille/translate`, and `/braille/output` (WS) for diagnostics.
 
 ## Dev setup (placeholder)
 ```bash
