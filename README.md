@@ -22,7 +22,11 @@ pytest
 
 ## Auth and orchestrator integration
 - Outbound event posts include `Authorization: Bearer $UNISON_ORCH_AUTH_TOKEN` if set.
-- Incoming requests can be validated against a JWKS (`UNISON_AUTH_JWKS_URL`) or OAuth2 introspection (`UNISON_AUTH_INTROSPECT_URL` + optional `UNISON_AUTH_CLIENT_ID`/`UNISON_AUTH_CLIENT_SECRET`). Falls back to scope strings for local/dev.
+- Incoming requests can be validated against a JWKS (`UNISON_AUTH_JWKS_URL`, cached/auto-refreshed) or OAuth2 introspection (`UNISON_AUTH_INTROSPECT_URL` + optional `UNISON_AUTH_CLIENT_ID`/`UNISON_AUTH_CLIENT_SECRET`). Falls back to scope strings for local/dev.
+
+## HID output
+- USB devices use hidapi for writes; drivers call async writes to avoid blocking the event loop.
+- Focus/HandyTech/HIMS drivers emit vendor-shaped output reports (report IDs 0x08/0x20/0x30 with cursor + dot masks).
 
 ## Contributing
 Open issues/PRs against the milestones in `docs/MILESTONES.md`. Add new device drivers by implementing the `BrailleDeviceDriver` interface and registering it with the driver registry. Translation tables should be added as configs or plugins in `src/translator/tables/`.

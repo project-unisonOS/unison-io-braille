@@ -33,6 +33,7 @@ _driver_registry.register("sim", SimulatedBrailleDriver)
 _manager = BrailleDeviceManager(_driver_registry)
 _active_devices: Dict[str, DeviceInfo] = {}
 _auth = AuthValidator()
+_jwks_task: Optional[asyncio.Task] = None
 
 
 def _bump(key: str) -> None:
@@ -206,6 +207,23 @@ def ingest_input(device_id: str = Body(..., embed=True), data: str = Body(..., e
     forward_events(events)
     _bump("/braille/input")
     return {"ok": True}
+
+
+@app.on_event("startup")
+async def on_startup():
+    global _jwks_task
+    if hasattr(_auth, "refresh_loop"):
+        _jwks_task = asyncio.create_task(_auth.refresh_loop())
+
+
+@app.on_event("shutdown")
+async def on_shutdown():
+    if _jwks_task:
+        _jwks_task.cancel()
+        try:
+            await _jwks_task
+        except Exception:
+            pass
 
 
 if __name__ == "__main__":

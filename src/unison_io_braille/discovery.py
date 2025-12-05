@@ -38,6 +38,9 @@ CAPABILITY_HINTS: Dict[str, Dict[str, int]] = {
     "0x0009": {"cells": 80, "rows": 1, "cols": 80},
     "0x1004": {"cells": 32, "rows": 1, "cols": 32},  # HandyTech 32 (example)
     "0x2001": {"cells": 20, "rows": 1, "cols": 20},  # HIMS small display
+    "0x2002": {"cells": 32, "rows": 1, "cols": 32},  # HIMS 32
+    "0x2003": {"cells": 40, "rows": 1, "cols": 40},  # HIMS 40
+    "0x1c71": {"cells": 32, "rows": 1, "cols": 32},  # Brailliant BI 32
 }
 
 

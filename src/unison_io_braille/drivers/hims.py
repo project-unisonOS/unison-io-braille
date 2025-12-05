@@ -44,7 +44,9 @@ class HimsBrailleDriver(BrailleDeviceDriver):
             report.append(mask)
         self.last_output = bytes(report)
         if self.writer:
-            self.writer.write(self.last_output)
+            write = getattr(self.writer, "write_async", None) or getattr(self.writer, "write", None)
+            if write:
+                write(self.last_output)
 
     def _make_event(self, etype: str, keys: List[str], text: str | None = None) -> BrailleEvent:
         return BrailleEvent(type=etype, keys=keys, text=text, device_id=self.device.id if self.device else None)

@@ -24,6 +24,7 @@ class AuthValidator:
         self.jwks_cached_at = 0.0
         self.jwks_ttl = 3600.0
         self.jwks_backoff_seconds = 300.0
+        self._refreshing = False
 
     def extract_token(self, auth_header: str | None) -> str | None:
         if not auth_header:
@@ -126,6 +127,18 @@ class AuthValidator:
             self.jwks = None
         finally:
             self.jwks_cached_at = now
+
+    async def refresh_loop(self) -> None:
+        """Background JWKS refresh loop; safe to run inside FastAPI lifespan."""
+        if not self.jwks_url or self._refreshing:
+            return
+        self._refreshing = True
+        try:
+            while True:
+                self._ensure_jwks()
+                await asyncio.sleep(self.jwks_ttl)
+        finally:
+            self._refreshing = False
 
     def authorize(self, auth_header: str | None, required_scope: str | None) -> bool:
         if not required_scope:
