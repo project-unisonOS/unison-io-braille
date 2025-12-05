@@ -161,7 +161,7 @@ async def discover_devices() -> Dict[str, Any]:
 
 
 @app.post("/braille/devices/attach")
-def attach_device(device: Dict[str, Any]) -> Dict[str, Any]:
+def attach_device(device: Dict[str, Any] = Body(..., embed=True)) -> Dict[str, Any]:
     """Manually attach a device record (for testing or static config)."""
     info = DeviceInfo(
         id=device.get("id") or f"manual:{len(_active_devices)+1}",

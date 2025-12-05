@@ -27,3 +27,12 @@ def test_input_event_helper():
     env = braille_input_event(evt, person_id="user1")
     assert env["event_type"] == "braille.input"
     assert env["person"]["id"] == "user1"
+
+
+def test_attach_and_list_devices():
+    client = TestClient(app)
+    headers = {"X-Test-Bypass": "1"}
+    resp = client.post("/braille/devices/attach", json={"device": {"id": "sim-1", "transport": "sim"}}, headers=headers)
+    assert resp.status_code == 200
+    lst = client.get("/braille/devices", headers=headers).json()
+    assert any(d["id"] == "sim-1" for d in lst["devices"])
