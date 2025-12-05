@@ -18,7 +18,12 @@ except Exception:  # pragma: no cover
 
 # Known VID/PID → driver key (placeholder; to be filled with real devices)
 KNOWN_USB_DEVICES: List[Tuple[str, str, str]] = [
-    # ("0x1234", "0xabcd", "generic-hid"),
+    # Freedom Scientific (e.g., Focus displays)
+    ("0x05f3", None, "focus-generic"),
+    # Handy Tech Elektronik
+    ("0x1fe4", None, "handytech"),
+    # HIMS (various models)
+    ("0x2001", None, "hims"),
 ]
 
 
