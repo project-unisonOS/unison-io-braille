@@ -227,4 +227,5 @@ async def on_shutdown():
 
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("BRAILLE_PORT", "8090")))
+    port = int(os.getenv("SERVICE_PORT") or os.getenv("BRAILLE_PORT", "8090"))
+    uvicorn.run(app, host="0.0.0.0", port=port)
